@@ -1,0 +1,30 @@
+name: punto_venta
+services:
+  punto_venta_api:
+    image: punto_venta_api:1.0.0
+    container_name: punto_venta_api
+    build: docker/app
+    tty: true
+    environment:
+      - PYTHONPATH=/app/
+    volumes:
+      - .:/app
+    ports:
+      - "5001:5001"
+    working_dir: /app
+    entrypoint: ['uvicorn', '--port=5001', '--host=0.0.0.0', '--reload', 'run:app']
+  punto_venta_db:
+    container_name: punto_venta_db
+    image: mysql:8-debian
+    restart: 'no'
+    environment:
+      - MYSQL_ROOT_PASSWORD=aicrag2310
+    volumes:
+      - "./docker/db/init:/docker-entrypoint-initdb.d"
+    ports:
+      - "3306:3306"
+
+networks:
+  default:
+    name: puntoventanet
+    external: true
