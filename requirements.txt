@@ -39,6 +39,5 @@ SQLAlchemy-Utils==0.38.2
 starlette==0.27.0
 typing_extensions==4.12.2
 ujson==5.7.0
-uvicorn==0.20.0
 zipp==3.20.2
 uvicorn[standard]==0.23.2
