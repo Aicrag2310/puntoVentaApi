@@ -5,8 +5,7 @@ import bcrypt
 from punto_venta_app.models import AppGenericException
 from datetime import datetime
 from typing import Optional
-from sqlalchemy import func
-
+from sqlalchemy import func, cast
 def create_product_from_request_data(db: Session, request_data: ProductFormRequestData) -> Product:
 
     register = Product()
@@ -76,7 +75,8 @@ def create_items_for_table(db: Session, limit: Optional[int], offset: Optional[i
         ]
         query = query.filter(*filters)
     
-    query = query.order_by(func.length(Product.id))
+    #query = query.order_by(func.length(Product.id))
+    query = query.order_by(func.length(cast(Product.id, 'TEXT')))
     query = query.limit(limit).offset(offset)
 
     return query.all()
