@@ -1,9 +1,13 @@
-from fastapi import FastAPI, Depends, Request
+from fastapi import FastAPI, Depends, Request, HTTPException
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 from punto_venta_app.settings import Settings, get_settings
 from punto_venta_app.models import AppGenericException, MessageResponse
 from punto_venta_app.exceptions import ValidationError
+from punto_venta_app.database import SessionLocal
+from punto_venta_app.database import get_db
+from sqlalchemy.orm import Session
+from sqlalchemy.exc import OperationalError
 
 
 def create_app():
@@ -18,6 +22,15 @@ def create_app():
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    @app.get("/api/db")
+    async def check_db_connection(db: Session = Depends(get_db)):
+        try:
+            # Realiza una consulta básica para verificar la conexión
+            db.execute("SELECT 1")
+            return {"status": "success", "message": "Database connection is active"}
+        except OperationalError:
+            raise HTTPException(status_code=500, detail="Cannot connect to the database")
 
     @app.get("/api/test/message")
     async def get_test_message():
