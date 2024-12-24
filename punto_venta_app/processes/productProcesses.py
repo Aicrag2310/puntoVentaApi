@@ -5,7 +5,8 @@ import bcrypt
 from punto_venta_app.models import AppGenericException
 from datetime import datetime
 from typing import Optional
-from sqlalchemy import func, cast
+from sqlalchemy import func
+
 def create_product_from_request_data(db: Session, request_data: ProductFormRequestData) -> Product:
 
     register = Product()
@@ -63,20 +64,22 @@ def update_product_from_request_data(db: Session, request_data: ProductUpdateFor
 
 
 def create_items_for_table(db: Session, limit: Optional[int], offset: Optional[int], search_query=None):
+
     query = db.query(Product).filter(Product.isActive == 1)
 
-    if search_query:
+    '''if search_query != '':
         palabras = search_query.split(' ')
-        for palabra in palabras:
-            query = query.filter(
-                Product.name.ilike(f'%{palabra}%') | Product.description.ilike(f'%{palabra}%')
-            )
+        filters = [
+            Product.name.op('REGEXP')(rf'(?i)(?=.*{palabra}).*') |
+            Product.description.op('REGEXP')(rf'(?i)(?=.*{palabra}).*')
+            for palabra in palabras
+        ]
+        query = query.filter(*filters)
     
-    query = query.order_by(func.length(cast(Product.id, 'TEXT')))
+    query = query.order_by(func.length(Product.id))'''
     query = query.limit(limit).offset(offset)
 
     return query.all()
-
 
 def make_products_table_item_from_register(product: Product) -> ProductTableItem:
     return ProductTableItem(**{
