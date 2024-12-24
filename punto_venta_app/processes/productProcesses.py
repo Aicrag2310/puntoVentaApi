@@ -63,23 +63,20 @@ def update_product_from_request_data(db: Session, request_data: ProductUpdateFor
 
 
 def create_items_for_table(db: Session, limit: Optional[int], offset: Optional[int], search_query=None):
-
     query = db.query(Product).filter(Product.isActive == 1)
 
-    if search_query != '':
+    if search_query:
         palabras = search_query.split(' ')
-        filters = [
-            Product.name.op('REGEXP')(rf'(?i)(?=.*{palabra}).*') |
-            Product.description.op('REGEXP')(rf'(?i)(?=.*{palabra}).*')
-            for palabra in palabras
-        ]
-        query = query.filter(*filters)
+        for palabra in palabras:
+            query = query.filter(
+                Product.name.ilike(f'%{palabra}%') | Product.description.ilike(f'%{palabra}%')
+            )
     
-    #query = query.order_by(func.length(Product.id))
     query = query.order_by(func.length(cast(Product.id, 'TEXT')))
     query = query.limit(limit).offset(offset)
 
     return query.all()
+
 
 def make_products_table_item_from_register(product: Product) -> ProductTableItem:
     return ProductTableItem(**{
